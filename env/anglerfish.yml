@@ -212,7 +212,6 @@ dependencies:
     - networkx==2.5
     - notebook==6.1.5
     - numpydoc==1.1.0
-    - nupack==4.0.0.20
     - openpyxl==3.0.9
     - packaging==20.7
     - pandas==1.1.4
