@@ -5,6 +5,7 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from Bio import SeqIO
 import json
+import argparse
 
 
 
@@ -29,17 +30,13 @@ def parse_probes(fpath):
     '''
 
     db = pd.read_csv(fpath)
-
     records = []
-
     for kmer in db.to_dict(orient="records"):
 
-        
         record_1 = SeqRecord(seq=Seq(kmer['HCR3-P1']), id=kmer['name']+'-P1')
         record_2 = SeqRecord(seq=Seq(kmer['HCR3-P2']), id=kmer['name']+'-P2')
         records.append(record_1)
         records.append(record_2)
-
 
     SeqIO.write(records, './blast/query/blast_query.fasta','fasta')
 
@@ -71,12 +68,19 @@ def parse_results(fpath):
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser(description='AnglerFISH, BLAST Script. Version 1.0.')
+    parser.add_argument("-organism", type=str, default='Mus musculus', required=False, help='Enter the name of the organism whose transcriptome you wish to BLAST probes against. Ex. Mus musculus.')
+    args = parser.parse_args()
+
+    organism = args.organism
+
+
     query_path = Path('./blast/query')
     results_path = Path('./blast/results')
     query_path.mkdir(parents=True, exist_ok=True)
     results_path.mkdir(parents=True, exist_ok=True)
     parse_probes('./probes/non_overlap_probes.csv')
-    transcriptome_blast('./blast/query/blast_query.fasta', organism=)
+    transcriptome_blast('./blast/query/blast_query.fasta', organism=organism)
 
     probes_db = pd.read_csv('./probes/non_overlap_probes.csv')
     probes_db['BLAST_1'] = parse_results('./blast/results/blast_results.json')[0]

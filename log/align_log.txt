@@ -1,3 +1,3 @@
-Started Tue May 24 10:34:29 2022
+Started Tue May 24 11:38:25 2022
 muscle -in ./docs/multi_fasta/multi_fasta.fasta -out ./docs/multi_align/multi_align.fasta -diags -log ./log/align_log.txt -maxiters 3 
-Finished Tue May 24 10:34:29 2022
+Finished Tue May 24 11:38:26 2022

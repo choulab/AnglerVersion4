@@ -355,7 +355,7 @@ if __name__ == "__main__":
     version = 1.00
 
     # write a log file with user-defined parameters
-    log_path = Path('./log/params.log')  
+    log_path = Path('./log/params.txt')  
     log_path.parent.mkdir(parents=True, exist_ok=True) 
 
     with open(log_path, 'w') as f:
@@ -421,8 +421,8 @@ if __name__ == "__main__":
     
     db_out = pd.DataFrame(output_list)
     print(db_out)
-    #db_HCR = append_HCR(db_out, initiator='B2')
-    #filepath = Path('./probes/non_overlap_probes.csv')  
-    #filepath.parent.mkdir(parents=True, exist_ok=True)  
-    #db_HCR.to_csv(filepath, index=False) 
+    db_HCR = append_HCR(db_out, initiator='B2')
+    filepath = Path('./probes/non_overlap_probes.csv')  
+    filepath.parent.mkdir(parents=True, exist_ok=True)  
+    db_HCR.to_csv(filepath, index=False) 
 
