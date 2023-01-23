@@ -1,0 +1,11 @@
+AnglerFISH v.1.0
+F = 30
+I = B2
+J = 3
+L = 3
+S = 3
+T = 37
+max_GC = 35
+max_Tm = 60
+min_GC = 55
+min_Tm = 40

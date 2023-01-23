@@ -1,0 +1,62 @@
+Started Mon Jan 23 22:38:24 2023
+muscle -in ./docs/multi_fasta/multi_fasta.fasta -out ./docs/multi_align/multi_align.fasta -diags -log ./log/align_log.txt -maxiters 3 -verbose 
+Alphabet DNA
+
+MUSCLE v3.8.31 by Robert C. Edgar
+http://www.drive5.com/muscle
+
+Profile-profile score    SPN
+Max iterations           3
+Max trees                1
+Max time                 (No limit)
+Max MB                   924
+Gap open                 -400
+Gap extend (dimer)       0
+Gap ambig factor         0
+Gap ambig penalty        -0
+Center (LE)              0
+Term gaps                Half
+Smooth window length     7
+Refine window length     200
+Min anchor spacing       32
+Min diag length (lambda) 24
+Diag margin (mu)         5
+Min diag break           1
+Hydrophobic window       5
+Hydrophobic gap factor   1.2
+Smooth score ceiling     999
+Min best col score       90
+Min anchor score         90
+SUEFF                    0.1
+Brenner root MSA         False
+Normalize counts         False
+Diagonals (1)            True
+Diagonals (2)            True
+Anchors                  True
+MSF output format        False
+Phylip interleaved       False
+Phylip sequential        False
+ClustalW output format   False
+Catch exceptions         True
+Quiet                    False
+Refine                   False
+ProdfDB                  False
+Low complexity profiles  True
+Objective score          SPM
+Distance method (1)      Kmer4_6
+Clustering method (1)    UPGMB
+Root method (1)          Pseudo
+Sequence weighting (1)   ClustalW
+Distance method (2)      PctIdKimura
+Clustering method (2)    UPGMB
+Root method (2)          Pseudo
+Sequence weighting (2)   ClustalW
+
+2 seqs, max length 5334, avg  length 5288
+Elapsed time 00:00:00  Peak memory use    10 MB(1%)  Iteration   1 K-mer dist pass 1
+Elapsed time 00:00:00  Peak memory use    10 MB(1%)  Iteration   1 K-mer dist pass 2
+Align: (NM_009957.2 Mus musculus protocadherin alpha 7 (Pcdha7), mRNA) (NM_201243.1 Mus musculus protocadherin alpha 8 (Pcdha8), mRNA)
+Elapsed time 00:00:00  Peak memory use    55 MB(5%)  Iteration   1 Align node
+Elapsed time 00:00:00  Peak memory use    55 MB(5%)  Iteration   1 Root alignment
+DP area saved by diagonals nan %
+Finished Mon Jan 23 22:38:24 2023

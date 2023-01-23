@@ -1,0 +1,9 @@
+version: "3.6"
+services:
+  python:
+    build: .
+    image: angler4
+    tty: true
+    volumes:
+      - ./app:/code
+    entrypoint: bash

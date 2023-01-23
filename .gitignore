@@ -3,4 +3,4 @@
 *.fasta
 *.fa
 *.ipynb
-
+__pycache__
