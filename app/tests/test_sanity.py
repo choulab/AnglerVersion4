@@ -5,16 +5,18 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
-def test_blast_defaults(capsys):
-    exit_status = os.system('python -m src.BLAST_probes')
+
+def test_kmers_defaults(capsys):
+    exit_status = os.system("python -m angler.target_kmers -max_Tm 60")
     captured = capsys.readouterr()
     print(captured.out)
     print(captured.err)
     logger.error(captured.err)
     assert exit_status == 0
 
-def test_kmers_defaults(capsys):
-    exit_status = os.system('python -m src.target_kmers -max_Tm 60')
+
+def test_blast_defaults(capsys):
+    exit_status = os.system("python -m angler.BLAST_probes")
     captured = capsys.readouterr()
     print(captured.out)
     print(captured.err)

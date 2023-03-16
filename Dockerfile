@@ -17,16 +17,17 @@ RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast
 RUN wget https://drive5.com/muscle/downloads3.8.31/muscle3.8.31_i86linux64.tar.gz && \
     tar -xvf muscle3.8.31_i86linux64.tar.gz && \
     chmod +x muscle3.8.31_i86linux64 && \
-    cp muscle3.8.31_i86linux64 /usr/local/bin/muscle
+    mv muscle3.8.31_i86linux64 /usr/local/bin/muscle
 
 # install nupack from github 
 RUN git clone https://github.com/beliveau-lab/NUPACK.git && \
     python3 -m pip install NUPACK/src/package/nupack-4.0.0.23-cp39-cp39-manylinux2014_x86_64.whl && \
     rm -rf NUPACK
 
+COPY requirements.txt ./requirements.txt
+
 # install remaining dependencies
-# TODO: move to pyproject.toml
-RUN pip install -U pytest biopython pandas python-levenshtein tqdm
+RUN pip install -r requirements.txt
 
 WORKDIR /code
 
