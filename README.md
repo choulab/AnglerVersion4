@@ -19,5 +19,3 @@ AnglerVersion4 enables the design of HCR 3.0 smFISH probes targeted to single RN
 - `min_Tm`: The minumum allowable formamide-adjusted Tm for a probe candidate. Default is 40 Celsius.
 
 - `max_Tm`: The maximum allowable formamide-adjusted Tm for a probe candidate. Default is 60 Celsius.
-
-- `I`: HCR Initiator. Default is B2.

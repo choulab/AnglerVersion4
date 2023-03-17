@@ -1,4 +1,5 @@
 import argparse
+from datetime import datetime
 from logging import getLogger, DEBUG
 import os
 from pathlib import Path
@@ -13,7 +14,7 @@ from nupack import *
 import pandas as pd
 from tqdm import tqdm
 
-from angler.util import configure_logger
+from angler.util import configure_logger, validate_directory
 
 logger = getLogger(__name__)
 
@@ -129,12 +130,14 @@ def concat_fasta(dir):
     """
     Concatenates each of the mRNA FASTA files into a single FASTA file prior to multi sequence alignment
     """
-
+    _, save_path = mkstemp("fasta")
+    logger.debug(f"Saving concatenated fasta to {save_path}")
     records = []
     for file in os.listdir(dir):
         for rec in SeqIO.parse(open(dir / file), "fasta"):
             records.append(rec)
-    SeqIO.write(records, "./docs/multi_fasta/multi_fasta.fasta", "fasta")
+    SeqIO.write(records, save_path, "fasta")
+    return save_path
 
 
 def multi_alignment(fpath):
@@ -143,19 +146,21 @@ def multi_alignment(fpath):
     """
 
     _, muscle_log_path = mkstemp()
+    _, save_path = mkstemp("fasta")
 
     logger.debug("Saving muscle logs to {muscle_log_path}")
+    logger.debug("Saving multi alignment fast file to {save_path}")
 
     muscle_cline = MuscleCommandline(
         input=fpath,
-        out="./docs/multi_align/multi_align.fasta",
+        out=save_path,
         diags=True,
         maxiters=3,
         verbose=True,
         log=muscle_log_path,
     )
     muscle_cline()
-    return None
+    return save_path
 
 
 def load_alignment(fpath):
@@ -370,6 +375,8 @@ def append_HCR(db, initiator):
 
 
 def run(
+    input_dir: str,
+    output_dir: str,
     min_GC=35,
     max_GC=55,
     spacing=3,
@@ -382,35 +389,54 @@ def run(
     min_length=52,
     max_length=52,
     version=1.00,
-    log_path=Path(__file__).parent.parent.absolute() / "log",
-    debug=False,
 ):
-    configure_logger(log_path, debug)
+    """
+    Run the target_kmers main function
 
-    logger.info("AnglerFISH v.{}".format(version))
+        Parameters
+            input_dir (str) : the directory of the file to be analyzed
+            min (int) : The minumum allowable %GC content for a probe candidate.
+            max_GC (int) : The maximum allowable %GC content for a probe candidate.
+            spacing (int) : The minumum spacing between probes in nucleotides.
+            min_Tm (int) : The minumum allowable formamide-adjusted Tm for a probe candidate.
+            max_Tm (int) : The maximum allowable formamide-adjusted Tm for a probe candidate.
+            max_lev (int) : The allowable Levenshtein Distance between a probe and an isoform.
+            formamide (int) : Hybridization buffer formamide content.
+            hyb_temp (float) : Probe hybridization temperature in degrees Celsius.
+            critical_junction_length (float) : The size of the optimized critical junction for HCR 3.0 Probes. Default is 3 nucleotides.
+            min_length (int)
+            max_length (int)
+            version (float) : Program version.
+
+        Returns:
+            (str) : Path to the results CSV file.
+    """
+
+    logger.debug("AnglerFISH v.{}".format(version))
 
     for arg, value in sorted(vars(args).items()):
         logger.info("{} = {}".format(arg, value))
 
-    # instatiate file paths
-    mrna_dir = Path("./docs/mrna_fasta")
-    mrna_fnames = os.listdir(mrna_dir)
+    input_dir = validate_directory(input_dir)
+    output_dir = validate_directory(output_dir)
+
+    mrna_fnames = os.listdir(input_dir)
     # create a database of probe candidates
-    concat_fasta(mrna_dir)
-    multi_alignment("./docs/multi_fasta/multi_fasta.fasta")
-    aligned_sequences = load_alignment("./docs/multi_align/multi_align.fasta")
+    concat_fasta_path = concat_fasta(input_dir)
+    multi_align_path = multi_alignment(concat_fasta_path)
+    aligned_sequences = load_alignment(multi_align_path)
     isoforms_dict = {rec.id: rec.seq for rec in aligned_sequences}
-    conservation_score = SNVscore("./docs/multi_align/multi_align.fasta")
+    conservation_score = SNVscore(multi_align_path)
 
     # calculate relevant features for each probe candidate
     output_db = []
 
     for target in tqdm(mrna_fnames, desc="Overall Progress"):
-        file = mrna_dir / target
+        file = input_dir / target
         output = create_kmer(
             file, min_length, max_length, form=formamide, temp=hyb_temp
         )
-        isoform_output = check_isoforms(output, "./docs/multi_fasta/multi_fasta.fasta")
+        isoform_output = check_isoforms(output, concat_fasta_path)
 
         for kmer in tqdm(
             isoform_output, desc="Mapping probes to MSA. This may take several minutes."
@@ -469,15 +495,26 @@ def run(
             output_list.append(j)
 
     db_out = pd.DataFrame(output_list)
-    print(db_out)
+    logger.debug(db_out)
     db_HCR = append_HCR(db_out, initiator="B2")
-    filepath = Path("./probes/non_overlap_probes.csv")
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    db_HCR.to_csv(filepath, index=False)
+    output_filepath = output_dir / f"{datetime.now().strftime('%Y-%m-%d-%H%M%S')}.csv"
+    db_HCR.to_csv(output_filepath, index=False)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="AnglerFISH. Version 1.0.")
+    parser.add_argument(
+        "-input_dir",
+        type=str,
+        required=True,
+        help="The absolute path to the directory containing the file(s) to be analyzed.",
+    )
+    parser.add_argument(
+        "-output_dir",
+        type=str,
+        required=True,
+        help="The absolute path to the directory where the results should be written.",
+    )
     parser.add_argument(
         "-min_GC",
         type=int,
@@ -558,7 +595,14 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    configure_logger(
+        args.log_path,
+        args.debug,
+    )
+
     run(
+        args.input_dir,
+        args.output_dir,
         args.min_GC,
         args.max_GC,
         args.S,
@@ -571,6 +615,4 @@ if __name__ == "__main__":
         52,
         52,
         1.00,
-        args.log_path,
-        args.debug,
     )
