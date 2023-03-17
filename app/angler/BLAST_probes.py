@@ -1,6 +1,9 @@
 import argparse
+from datetime import datetime
 import json
+from logging import getLogger
 from pathlib import Path
+from tempfile import mkstemp
 
 from Bio import SeqIO
 from Bio.Blast.Applications import NcbiblastnCommandline
@@ -8,7 +11,9 @@ from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 import pandas as pd
 
-from angler.util import configure_logger
+from angler.util import configure_logger, validate_directory
+
+logger = getLogger(__name__)
 
 
 def transcriptome_blast(query_fasta, organism="House mouse"):
@@ -17,6 +22,9 @@ def transcriptome_blast(query_fasta, organism="House mouse"):
        a single JSON contaning the BLAST results 
     """
 
+    _, save_path = mkstemp(".json", text=True)
+    logger.debug(f"Saving multi fasta blast results to to {save_path}")
+
     cline = NcbiblastnCommandline(
         query=query_fasta,
         task="blastn-short",
@@ -24,7 +32,7 @@ def transcriptome_blast(query_fasta, organism="House mouse"):
         evalue=1000,
         gapopen=5,
         gapextend=2,
-        out="./blast/results/blast_results.json",
+        out=save_path,
         outfmt=15,
         entrez_query='"{} [ORGN]"'.format(organism),
         remote=True,
@@ -35,7 +43,7 @@ def transcriptome_blast(query_fasta, organism="House mouse"):
     )
 
     cline()
-    return None
+    return save_path
 
 
 def parse_probes(fpath):
@@ -51,7 +59,12 @@ def parse_probes(fpath):
         records.append(record_1)
         records.append(record_2)
 
-    SeqIO.write(records, "./blast/query/blast_query.fasta", "fasta")
+    _, save_path = mkstemp("fasta")
+    logger.debug(f"Saving probe candidates to {save_path}")
+
+    SeqIO.write(records, save_path, "fasta")
+
+    return save_path
 
 
 def parse_results(fpath):
@@ -83,27 +96,39 @@ def parse_results(fpath):
     return [output_1, output_2]
 
 
-def run(organism: str):
+def run(organism: str, input_filepath: str, output_dir: str):
     """
     Get the BLAST probes
 
         Parameters
             organism (str) : the organism to analyze
+            input_filepath : the path to the file to analyze
+            output_dir (str): the absolute path to the directory where the results should be written
 
-        Returns: None
+        Returns:
+            (str) the path to the results file
     """
 
-    query_path = Path("./blast/query")
-    results_path = Path("./blast/results")
-    query_path.mkdir(parents=True, exist_ok=True)
-    results_path.mkdir(parents=True, exist_ok=True)
-    parse_probes("./probes/non_overlap_probes.csv")
-    transcriptome_blast("./blast/query/blast_query.fasta", organism=organism)
+    output_dir = validate_directory(output_dir)
 
-    probes_db = pd.read_csv("./probes/non_overlap_probes.csv")
-    probes_db["BLAST_1"] = parse_results("./blast/results/blast_results.json")[0]
-    probes_db["BLAST_2"] = parse_results("./blast/results/blast_results.json")[1]
-    probes_db.to_csv("./probes/BLAST_probes.csv")
+    if not Path(input_filepath).exists:
+        raise FileNotFoundError(f"{input_filepath} does not exist!")
+
+    probe_candidate_path = parse_probes(input_filepath)
+    blast_results_path = transcriptome_blast(probe_candidate_path, organism=organism)
+
+    probes_db = pd.read_csv(input_filepath)
+    probes_db["BLAST_1"] = parse_results(blast_results_path)[0]
+    probes_db["BLAST_2"] = parse_results(blast_results_path)[1]
+
+    blast_probes_save_path = (
+        output_dir
+        / f"blast-probe-results-{datetime.now().strftime('%Y-%m-%d-%H%M%S')}.csv"
+    )
+
+    probes_db.to_csv(blast_probes_save_path)
+
+    return blast_results_path
 
 
 if __name__ == "__main__":
@@ -125,6 +150,7 @@ if __name__ == "__main__":
         required=False,
         help="The directory where the log file should be placed.",
     )
+
     parser.add_argument(
         "-debug",
         type=bool,
@@ -133,8 +159,22 @@ if __name__ == "__main__":
         help="Whether to enable verbose logging.",
     )
 
+    parser.add_argument(
+        "-output_dir",
+        type=str,
+        required=True,
+        help="The absolute path to the directory where the results should be written.",
+    )
+
+    parser.add_argument(
+        "-input_filepath",
+        type=str,
+        required=True,
+        help="The absolute path to the probe csv.",
+    )
+
     args = parser.parse_args()
 
     configure_logger(args.log_path, args.debug)
 
-    run(args.organism)
+    run(args.organism, args.input_filepath, args.output_dir)

@@ -130,7 +130,7 @@ def concat_fasta(dir):
     """
     Concatenates each of the mRNA FASTA files into a single FASTA file prior to multi sequence alignment
     """
-    _, save_path = mkstemp("fasta")
+    _, save_path = mkstemp(".fasta")
     logger.debug(f"Saving concatenated fasta to {save_path}")
     records = []
     for file in os.listdir(dir):
@@ -409,7 +409,7 @@ def run(
             version (float) : Program version.
 
         Returns:
-            (str) : Path to the results CSV file.
+            (str) : Path to the results CSV file containing probes.
     """
 
     logger.debug("AnglerFISH v.{}".format(version))
@@ -497,7 +497,10 @@ def run(
     db_out = pd.DataFrame(output_list)
     logger.debug(db_out)
     db_HCR = append_HCR(db_out, initiator="B2")
-    output_filepath = output_dir / f"{datetime.now().strftime('%Y-%m-%d-%H%M%S')}.csv"
+    output_filepath = (
+        output_dir
+        / f"target-kmers-results-{datetime.now().strftime('%Y-%m-%d-%H%M%S')}.csv"
+    )
     db_HCR.to_csv(output_filepath, index=False)
 
 

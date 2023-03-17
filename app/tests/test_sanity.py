@@ -7,6 +7,20 @@ from pathlib import Path
 logger = getLogger(__name__)
 
 
+def test_blast_defaults(capsys, tmp_path):
+    input_filepath = Path(__file__).parent.parent / "static" / "non_overlap_probes.csv"
+    assert len(list(tmp_path.glob("*.csv"))) == 0
+    exit_status = os.system(
+        f"python -m angler.BLAST_probes -input_filepath {input_filepath} -output_dir {tmp_path}"
+    )
+    captured = capsys.readouterr()
+    print(captured.out)
+    print(captured.err)
+    logger.error(captured.err)
+    assert exit_status == 0
+    assert len(list(tmp_path.glob("*.csv"))) == 1
+
+
 def test_kmers_defaults(capsys, tmp_path):
     input_dir = Path(__file__).parent.parent / "static" / "mrna_fasta"
     assert len(list(tmp_path.glob("*.csv"))) == 0
@@ -19,12 +33,3 @@ def test_kmers_defaults(capsys, tmp_path):
     logger.error(captured.err)
     assert exit_status == 0
     assert len(list(tmp_path.glob("*.csv"))) == 1
-
-
-def test_blast_defaults(capsys):
-    exit_status = os.system("python -m angler.BLAST_probes")
-    captured = capsys.readouterr()
-    print(captured.out)
-    print(captured.err)
-    logger.error(captured.err)
-    assert exit_status == 0

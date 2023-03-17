@@ -1,1 +1,1 @@
-These files are for testing fixtures. See [test-sanity.py](./../tests/test_sanity.py) for example usage.
+These files are temporary testing fixtures. See [test-sanity.py](./../tests/test_sanity.py) for example usage.
