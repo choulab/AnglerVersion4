@@ -5,6 +5,5 @@
 *.ipynb
 __pycache__
 .pytest_cache
-log/**/*
-!log/.gitkeep
-angler.log
+app/log/**/*
+!app/log/.gitkeep
