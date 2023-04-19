@@ -128,7 +128,7 @@ def run(organism: str, input_filepath: str, output_dir: str):
 
     probes_db.to_csv(blast_probes_save_path)
 
-    return blast_results_path
+    return blast_probes_save_path
 
 
 if __name__ == "__main__":

@@ -395,6 +395,7 @@ def run(
 
         Parameters
             input_dir (str) : the directory of the file to be analyzed
+            output_dir (str) : the directory where the results will be stored
             min (int) : The minumum allowable %GC content for a probe candidate.
             max_GC (int) : The maximum allowable %GC content for a probe candidate.
             spacing (int) : The minumum spacing between probes in nucleotides.
@@ -414,7 +415,7 @@ def run(
 
     logger.debug("AnglerFISH v.{}".format(version))
 
-    for arg, value in sorted(vars(args).items()):
+    for arg, value in sorted(locals().items()):
         logger.info("{} = {}".format(arg, value))
 
     input_dir = validate_directory(input_dir)
@@ -501,7 +502,10 @@ def run(
         output_dir
         / f"target-kmers-results-{datetime.now().strftime('%Y-%m-%d-%H%M%S')}.csv"
     )
+
     db_HCR.to_csv(output_filepath, index=False)
+
+    return output_filepath
 
 
 if __name__ == "__main__":

@@ -1,10 +1,19 @@
+from angler.angler import run_angler
+
 import os
 from logging import getLogger
 from pathlib import Path
 
 # for now testing the command line tools only, not individual functions
+# todo: test functions
 
 logger = getLogger(__name__)
+
+
+def test_run_angler(tmp_path):
+    input_dir = Path(__file__).parent.parent / "static" / "mrna_fasta"
+    run_angler(input_dir=input_dir, output_dir=tmp_path)
+    assert len(list(tmp_path.glob("*.csv"))) == 1
 
 
 def test_blast_defaults(capsys, tmp_path):

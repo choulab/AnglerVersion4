@@ -27,6 +27,9 @@ scipy = "^1.10.1"
 python-Levenshtein = "^0.20.9"
 nupack = {path = "NUPACK/src/package/nupack-4.0.0.23-cp39-cp39-manylinux2014_x86_64.whl"}
 
+[tool.poetry.group.dev.dependencies]
+black = "^23.3.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
