@@ -1,10 +1,12 @@
 from pathlib import Path
 from tempfile import mkdtemp
+from logging import getLogger
 
 from angler.BLAST_probes import run as run_blast
 from angler.target_kmers import run as run_kmers
 from angler.util import configure_logger
 
+logger = getLogger(__name__)
 
 def run_angler(
     input_dir: str,
@@ -52,6 +54,8 @@ def run_angler(
 
     kmers_output_dir = mkdtemp()
 
+    logger.debug(f"Saving kmers results to temp directory {kmers_output_dir}")
+
     probe_path = run_kmers(
         input_dir=input_dir,
         output_dir=kmers_output_dir,
@@ -69,6 +73,17 @@ def run_angler(
         version=version,
     )
 
-    return run_blast(
-        organism=organism, input_filepath=probe_path, output_dir=output_dir
-    )
+    logger.debug("kmers complete.")
+    logger.debug(f"Running BLAST probes and saving to {output_dir}")
+    print("Running BLAST probes. This may take several minutes....")
+
+    try:
+        result_path = run_blast(
+            organism=organism, input_filepath=probe_path, output_dir=output_dir
+        )
+    except Exception as e:
+        logger.error(e)
+        print("BLAST probe creation failed. See logs for details.")
+        return
+
+    return result_path

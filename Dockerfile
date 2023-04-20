@@ -51,11 +51,12 @@ ENV PATH="$VIRTUAL_ENV/bin:$POETRY_HOME/bin:$PATH"
 
 WORKDIR /code
 
+# pull in NUPACK source and install python dependencies
+RUN git clone https://github.com/beliveau-lab/NUPACK.git
+
 COPY --chown=${USER_UID}:${USER_UID} ./app /code
 
-# pull in NUPACK source and install python dependencies
-RUN git clone https://github.com/beliveau-lab/NUPACK.git && \
-    poetry install 
+RUN poetry install
 
 # We will leave nupack there so later builds can install the package
 # in the future we'll push to PyPI

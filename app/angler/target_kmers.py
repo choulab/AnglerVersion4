@@ -146,10 +146,10 @@ def multi_alignment(fpath):
     """
 
     _, muscle_log_path = mkstemp()
-    _, save_path = mkstemp("fasta")
+    _, save_path = mkstemp(".fasta")
 
-    logger.debug("Saving muscle logs to {muscle_log_path}")
-    logger.debug("Saving multi alignment fast file to {save_path}")
+    logger.debug(f"Saving muscle logs to {muscle_log_path}")
+    logger.debug(f"Saving multi alignment fasta file to {save_path}")
 
     muscle_cline = MuscleCommandline(
         input=fpath,
@@ -470,6 +470,8 @@ def run(
 
             else:
                 print("ERROR: Unable to map probe candidate to MSA")
+
+    logger.debug("finished mapping probes to MSA.")
 
     # remove probe candidates that do not compply with user-specified criteria
     output_db = filter_db(

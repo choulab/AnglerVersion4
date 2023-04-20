@@ -38,7 +38,7 @@ def configure_logger(path: str = None, verbose=False):
             verbose (bool): whether to enable verbose logs (sets logging level to DEBUG)
     """
     if path and not isdir(path):
-        raise FileNotFoundError(f"{path} either does not exist or is a directory!")
+        raise FileNotFoundError(f"{path} either does not exist or is not a directory!")
     elif not isabs(path):
         raise ValueError(f"Log path must be absolute!")
     elif path:

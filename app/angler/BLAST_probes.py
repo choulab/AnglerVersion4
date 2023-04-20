@@ -59,7 +59,7 @@ def parse_probes(fpath):
         records.append(record_1)
         records.append(record_2)
 
-    _, save_path = mkstemp("fasta")
+    _, save_path = mkstemp(".fasta")
     logger.debug(f"Saving probe candidates to {save_path}")
 
     SeqIO.write(records, save_path, "fasta")
@@ -109,6 +109,9 @@ def run(organism: str, input_filepath: str, output_dir: str):
             (str) the path to the results file
     """
 
+    logger.debug(f"running BLAST probes on files located at {input_filepath}")
+
+
     output_dir = validate_directory(output_dir)
 
     if not Path(input_filepath).exists:
@@ -127,6 +130,8 @@ def run(organism: str, input_filepath: str, output_dir: str):
     )
 
     probes_db.to_csv(blast_probes_save_path)
+
+    logger.debug(f"Saving BLAST results to {blast_probes_save_path}")
 
     return blast_probes_save_path
 
