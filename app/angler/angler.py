@@ -86,4 +86,6 @@ def run_angler(
         print("BLAST probe creation failed. See logs for details.")
         return
 
+    print(f"Probe genreation complete! The result file is located at {result_path}.")
+
     return result_path

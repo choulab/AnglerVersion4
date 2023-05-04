@@ -5,5 +5,5 @@ services:
     image: angler4
     tty: true
     volumes:
-      - ./app:/code
+      - ./app:/angler4
     entrypoint: bash

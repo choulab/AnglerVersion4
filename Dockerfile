@@ -9,7 +9,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR /angler
+WORKDIR /angler4
 
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
@@ -19,7 +19,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
 #install blast binaries
-RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.13.0+-x64-linux.tar.gz && \
+RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.13.0/ncbi-blast-2.13.0+-x64-linux.tar.gz && \
     tar -xvf ncbi-blast-2.13.0+-x64-linux.tar.gz && \
     rm ncbi-blast-2.13.0+-x64-linux.tar.gz && \
     cp ncbi-blast-2.13.0+/bin/blastn /usr/bin/ && \
@@ -39,7 +39,7 @@ RUN python3 -m venv $POETRY_HOME && \
     mkdir /poetry-env && \
     chown -R $USER_UID:$USER_UID /poetry-env
 
-RUN mkdir /code && chown -R ${USER_UID}:${USER_UID} /code
+RUN chown -R ${USER_UID}:${USER_UID} /angler4
 
 USER ${USER_UID}
 
@@ -49,15 +49,9 @@ RUN python3 -m venv $VIRTUAL_ENV
 
 ENV PATH="$VIRTUAL_ENV/bin:$POETRY_HOME/bin:$PATH"
 
-WORKDIR /code
-
 # pull in NUPACK source and install python dependencies
 RUN git clone https://github.com/beliveau-lab/NUPACK.git
 
-COPY --chown=${USER_UID}:${USER_UID} ./app /code
+COPY --chown=${USER_UID}:${USER_UID} ./app /angler4
 
 RUN poetry install
-
-# We will leave nupack there so later builds can install the package
-# in the future we'll push to PyPI
-
