@@ -10,10 +10,22 @@ from pathlib import Path
 logger = getLogger(__name__)
 
 
-def test_run_angler(tmp_path):
+def test_run_angler(capsys, tmp_path):
     input_dir = Path(__file__).parent.parent / "static" / "mrna_fasta"
-    run_angler(input_dir=input_dir, output_dir=tmp_path)
+    output_dir = tmp_path
+    run_angler(input_dir=input_dir, output_dir=output_dir)
+
     assert len(list(tmp_path.glob("*.csv"))) == 1
+
+    exit_status = os.system(
+        f"python -m angler.angler --input_dir {input_dir} --output_dir {tmp_path}"
+    )
+    captured = capsys.readouterr()
+    print(captured.out)
+    print(captured.err)
+    logger.error(captured.err)
+    assert exit_status == 0
+    assert len(list(tmp_path.glob("*.csv"))) == 2
 
 
 def test_blast_defaults(capsys, tmp_path):
