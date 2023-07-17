@@ -39,3 +39,5 @@ RUN git clone https://github.com/choulab/NUPACK.git
 COPY ./app /angler4
 
 RUN poetry install
+
+ENTRYPOINT [ "python3", "-m" , "angler.angler" ]
