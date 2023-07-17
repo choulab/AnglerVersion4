@@ -1,22 +1,11 @@
 FROM python:3.9-slim
 
-ARG USERNAME=angler-user
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-
 RUN apt-get update && \
-    apt-get install -y build-essential wget git sudo && \
+    apt-get install -y build-essential wget git && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /angler4
-
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && apt-get update \
-    && apt-get install -y \
-    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
-    && chmod 0440 /etc/sudoers.d/$USERNAME
 
 #install blast binaries
 RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.13.0/ncbi-blast-2.13.0+-x64-linux.tar.gz && \
@@ -36,22 +25,17 @@ RUN wget https://drive5.com/muscle/downloads3.8.31/muscle3.8.31_i86linux64.tar.g
 ENV POETRY_HOME /opt/poetry
 RUN python3 -m venv $POETRY_HOME && \
     $POETRY_HOME/bin/pip install poetry==1.2.0 && \
-    mkdir /poetry-env && \
-    chown -R $USER_UID:$USER_UID /poetry-env
-
-RUN chown -R ${USER_UID}:${USER_UID} /angler4
-
-USER ${USER_UID}
+    mkdir /poetry-env
 
 # local user needs to create the venv
-ENV VIRTUAL_ENV /poetry-env 
+ENV VIRTUAL_ENV /poetry-env
 RUN python3 -m venv $VIRTUAL_ENV
 
 ENV PATH="$VIRTUAL_ENV/bin:$POETRY_HOME/bin:$PATH"
 
 # pull in NUPACK source and install python dependencies
-RUN git clone https://github.com/beliveau-lab/NUPACK.git
+RUN git clone https://github.com/choulab/NUPACK.git
 
-COPY --chown=${USER_UID}:${USER_UID} ./app /angler4
+COPY ./app /angler4
 
 RUN poetry install
