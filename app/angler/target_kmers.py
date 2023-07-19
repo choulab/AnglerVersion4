@@ -363,14 +363,21 @@ def remove_overlaps(kmer_list, min_spacing=3):
 
 
 def append_HCR(db, initiator):
-    if initiator == "B2":
-        db["HCR3-P1-B2"] = db["HCR3-P1"].astype(str) + "AAATCATCCAGTAAACCGCC"
-        db["HCR3-P2-B2"] = "CCTCGTAAATCCTCATCAAA" + db["HCR3-P2"].astype(str)
-    elif initiator == "B3":
-        db["HCR3-P1-B3"] = db["HCR3-P2"].astype(str) + "TTCCACTCAACTTTAACCCG"
-        db["HCR3-P2-B3"] = "GTCCCTGCCTCTATATCTTT" + db["HCR3-P2"].astype(str)
-    else:
-        raise ValueError("Invalid HCR Initiator")
+    try:
+        if initiator == "B2":
+            db["HCR3-P1-B2"] = db["HCR3-P1"].astype(str) + "AAATCATCCAGTAAACCGCC"
+            db["HCR3-P2-B2"] = "CCTCGTAAATCCTCATCAAA" + db["HCR3-P2"].astype(str)
+        elif initiator == "B3":
+            db["HCR3-P1-B3"] = db["HCR3-P2"].astype(str) + "TTCCACTCAACTTTAACCCG"
+            db["HCR3-P2-B3"] = "GTCCCTGCCTCTATATCTTT" + db["HCR3-P2"].astype(str)
+        else:
+            raise ValueError("Invalid HCR Initiator")
+
+    except Exception as e:
+        logger.debug("ERROR APPENDING HCR! `db` objected dumped below for reference:")
+        logger.debug(db)
+        raise
+
     return db
 
 
@@ -498,7 +505,6 @@ def run(
             output_list.append(j)
 
     db_out = pd.DataFrame(output_list)
-    logger.debug(db_out)
     db_HCR = append_HCR(db_out, initiator="B2")
     output_filepath = (
         output_dir

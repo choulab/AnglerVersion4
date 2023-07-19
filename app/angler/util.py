@@ -46,9 +46,11 @@ def configure_logger(path: str = None, verbose=False):
     else:
         log_path = join(mkdtemp(), "angler.log")
 
+    print(f"Logs will be written to {log_path}")
+
     if verbose:
-        print(f"Logs will be written to {log_path}")
         level = DEBUG
+        print("**VERBOSE LOGGING ENABLED**")
     else:
         level = INFO
 

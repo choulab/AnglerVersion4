@@ -14,7 +14,7 @@ EXAMPLE: ./run-angler.sh \
   --input_dir /home/my-user/AnglerVersion4/app/static/mrna_fasta \
   --output_dir /home/my-user/angler-results-tmp \
   --log_dir /home/my-user/AnglerVersion4/app/log \
-  --debug \
+  --debug
 ```
 
 The above will run the command in a docker container and mount the input and output directories so the files and results are available on your machine (and not just inside the container). **Note**: take care to ensure that both directories exist on your machine, otherwise Docker will create them and, with the input directory empty, the command will fail!
